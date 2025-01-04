@@ -1,0 +1,34 @@
+http:
+  routers:
+    blue:
+      rule: "Host(`localhost`)"
+      service: blue-service
+      priority: 10
+      entryPoints:
+        - web
+    green:
+      rule: "Host(`localhost`)"
+      service: green-service
+      priority: 20
+      entryPoints:
+        - web
+    web:
+      rule: "Host(`localhost`)"
+      service: web-service
+      priority: 50
+      entryPoints:
+        - web
+  services:
+    blue-service:
+      loadBalancer:
+        servers:
+          - url: "http://nginx_app_1:80"
+    green-service:
+      loadBalancer:
+        servers:
+          - url: "http://nginx_app_2:80"
+    web-service:
+      loadBalancer:
+        servers:
+          - url: "http://webv2:80"
+

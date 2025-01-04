@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.file.directory=/configs"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./configs:/configs
+    networks:
+      - web
+
+  nginx_app_1:
+    image: nginx:latest
+    labels:
+      - "traefik.enable=false"
+    volumes:
+      - ./templates:/etc/nginx/templates
+    networks:
+      - web
+
+  nginx_app_2:
+    image: nginx:latest
+    labels:
+      - "traefik.enable=false"
+    volumes:
+      - ./templates:/etc/nginx/templates
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge

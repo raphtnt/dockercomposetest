@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080" # Dashboard de Traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+
+  nginx_app_1:
+    image: nginx:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.myapp1.rule=Host(`localhost`)"
+      - "traefik.http.services.myapp1.loadbalancer.server.port=80"
+      - "traefik.http.routers.myapp1.priority=1"
+    networks:
+      - web
+
+  nginx_app_2:
+    image: nginx:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.myapp2.rule=Host(`localhost`) && PathPrefix(`/v2`)"
+      - "traefik.http.services.myapp2.loadbalancer.server.port=80"
+      - "traefik.http.routers.myapp2.priority=2"
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
